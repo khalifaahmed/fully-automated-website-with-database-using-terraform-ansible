@@ -1,0 +1,7 @@
+*.terraform*
+*.tfstate*
+*terraform.tfstate*
+*key*
+*minikube*
+ec2-docker*
+*nexus*

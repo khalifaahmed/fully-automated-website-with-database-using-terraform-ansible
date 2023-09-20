@@ -1,0 +1,63 @@
+- name: play-1 
+  hosts: all
+  become: yes
+  tasks: 
+  - name: install packages 
+    vars:
+      ansible_python_interpreter: /usr/bin/python
+    yum:
+      name:
+      - python
+      - python3
+      - pip
+      - vim
+      - net-tools
+      - mysql-server
+      - mysql
+      update_cache: yes
+      state: present
+  - name: start & enable mysqld
+    systemd: 
+      name: mysqld
+      state: started
+      enabled: true      
+  - name: Install docker mysql module
+    vars:
+      ansible_python_interpreter: /usr/bin/python
+    pip: 
+      name: 
+      - mysql-connector 
+      - PyMySQL   
+  # - name: Install mysql python module
+  #   vars:
+  #     ansible_python_interpreter: /usr/bin/python3
+  #   pip: 
+  #     name: 
+  #     - mysql-connector          
+  - name: Create database user with password and all database privileges and 'WITH GRANT OPTION'
+    community.mysql.mysql_user:
+      name: iti
+      password: iti
+      priv: '*.*:ALL,GRANT'
+      state: present
+      host: '%'
+  - name: Removes all anonymous user accounts
+    community.mysql.mysql_user:
+      name: 'iti'
+      host_all: true
+      state: present      
+  - name: Set a hostname
+    ansible.builtin.hostname:
+      name: db-server   
+  - name: Reconnect to server session
+    meta: reset_connection      
+  - name: Create a new database with name 'iti'
+    community.mysql.mysql_db:
+      name: iti
+      state: present
+  - name: Run several insert queries against db test_db in single transaction
+    community.mysql.mysql_query:
+      login_db: iti
+      query:
+      # - create table userinfo (fname varchar(15), lname varchar(15), email varchar(30)  , constraint c1 primary key (fname))
+      - create table userinfo (fname varchar(15), lname varchar(15), email varchar(30) )

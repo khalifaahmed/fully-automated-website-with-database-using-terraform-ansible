@@ -1,0 +1,66 @@
+- name: play-1 
+  hosts: all
+  become: yes
+  tasks: 
+  - name: installing  packages
+    vars:
+      ansible_python_interpreter: /usr/bin/python3
+    yum:
+      name:
+      # - python
+      # - python3
+      # - pip
+      - podman-docker                        #- podman   #- docker-compose
+      - yum-utils
+      # - httpd
+      - vim
+      # - net-tools
+      # - mysql                                #- mysql-server
+      - firewalld                            #- firewalld-1.0.0-4.el9.noarch
+      - bash-completion.noarch
+      - lvm2-9:2.03.17-7.el9.x86_64
+      - unzip.x86_64
+      update_cache: yes
+      state: present
+  - name: making some alias
+    ansible.builtin.blockinfile:
+      path: /etc/bashrc
+      block: |
+        alias c=clear
+        alias k=kubectl    
+
+  - name:  Check if aws folder exists
+    stat:
+      path: /root/aws
+    register: stat_aws_result
+  - name: output the register stat_aws_result value
+    debug:
+      msg: 
+      - "the stat_aws_result register =  {{stat_aws_result}} "  
+  - name:  Download awscli
+    get_url:
+      url: https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip
+      dest: /root/
+    when: not stat_aws_result.stat.exists
+    register: download_result
+  - name: output the register download_result value
+    debug:
+      msg: 
+      - "the download_result register =  {{download_result}}"  
+  - name: Untar awscli installer
+    unarchive:
+      src: "{{download_result.dest}}"
+      dest: /root/
+      remote_src: yes
+    when: not stat_aws_result.stat.exists
+    register: unarchive_result
+  - name: output the register unarchive_result value
+    debug:
+      msg: 
+      - "the unarchive_result register =  {{unarchive_result}} "  
+    when: not stat_aws_result.stat.exists
+  - name: install awscli
+    ansible.builtin.command: 
+      cmd:  /root/aws/install       # === unarchive_result.inflating 
+
+

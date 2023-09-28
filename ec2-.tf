@@ -21,7 +21,7 @@ resource "local_file" "ssh_key" {
   }
 }
 
-
+# Create 2 separate ec2 instances, one for db_server and the other for the web_server
 resource "aws_instance" "db_server" {
   ami                         = data.aws_ami.redhat.id
   instance_type               = data.aws_region.current_region.name == "eu-north-1" ? "t3.micro" : "t2.micro" # var.instance_type
@@ -29,6 +29,19 @@ resource "aws_instance" "db_server" {
   associate_public_ip_address = true
   subnet_id                   = aws_subnet.public[0].id
   vpc_security_group_ids      = [aws_security_group.grad_proj_sg["ssh"].id, aws_security_group.grad_proj_sg["http_https"].id, aws_security_group.grad_proj_sg["public"].id] #vpc_security_group_ids      = [ aws_security_group.http-only.id, aws_security_group.ssh-only.id ]
+  source_dest_check           = true
+  credit_specification {
+    cpu_credits = "standard" #As T3 instances are launched as unlimited by default. T2 instances are launched as standard by default
+  }
+
+  # root disk  
+  root_block_device {
+    volume_size           = 10
+    volume_type           = "gp2"
+    encrypted             = false
+    delete_on_termination = true
+  }
+
   tags = {
     "Name" = "db-server"
   }
@@ -40,7 +53,6 @@ resource "aws_instance" "db_server" {
 }
 
 
-
 resource "aws_instance" "httpd_server" {
   depends_on                  = [aws_instance.db_server]
   ami                         = data.aws_ami.redhat.id
@@ -48,7 +60,20 @@ resource "aws_instance" "httpd_server" {
   key_name                    = aws_key_pair.key_pair.key_name
   associate_public_ip_address = true
   subnet_id                   = aws_subnet.public[0].id
-  vpc_security_group_ids      = [aws_security_group.grad_proj_sg["ssh"].id, aws_security_group.grad_proj_sg["http_https"].id, aws_security_group.grad_proj_sg["public"].id] #vpc_security_group_ids      = [ aws_security_group.http-only.id, aws_security_group.ssh-only.id ]
+  vpc_security_group_ids      = [aws_security_group.grad_proj_sg["ssh"].id, aws_security_group.grad_proj_sg["http_https"].id, aws_security_group.grad_proj_sg["public"].id]
+  source_dest_check           = true
+  credit_specification {
+    cpu_credits = "standard" #As T3 instances are launched as unlimited by default. T2 instances are launched as standard by default
+  }
+
+  # root disk  
+  root_block_device {
+    volume_size           = 10
+    volume_type           = "gp2"
+    encrypted             = false
+    delete_on_termination = true
+  }
+
   tags = {
     "Name" = "httpd-server"
   }
@@ -60,10 +85,10 @@ resource "aws_instance" "httpd_server" {
 }
 
 
-output "the_IP_of_the_db_server_instance" {
+output "the_puboic_IP_of_the_db_server_instance" {
   value = aws_instance.db_server.public_ip
 }
 
-output "dns_of_the_web_server___just_copy_it_in_the_browser" {
+output "the_dns_of_the_web_server___just_copy_it_in_the_browser" {
   value = aws_instance.httpd_server.public_dns
 }

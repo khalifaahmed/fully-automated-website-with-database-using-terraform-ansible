@@ -1,37 +1,67 @@
 <?php
-$servername = "3.137.216.245";   
+
+if(isset($_POST['firstname'], $_POST['lastname'], $_POST['age'], $_POST['email'])){
+session_start();
+$firstname = $_POST['firstname'];
+$lastname  = $_POST['lastname'];
+$age = $_POST['age'];
+$email = $_POST['email'];
+
+$_SESSION['firstname'] = $firstname;  
+$_SESSION['lastname'] = $lastname; 
+$_SESSION['age'] = $age;
+$_SESSION['email'] = $email;
+}
+
+echo "<br> Hello  '$firstname $lastname', your age is $age & your email is '$email'<br>";
+
+$servername = "13.49.68.186";   
 $database   = "iti";   
 $username   = "iti";     
 $password   = "iti";     
 //$table      = "userinfo";
 
-if(isset($_POST['firstname'], $_POST['lastname'], $_POST['email'])){
-session_start();
-$firstname = $_POST['firstname'];  
-$lastname = $_POST['lastname'];    
-$email = $_POST['email'];
-
-$_SESSION['firstname'] = $firstname;  
-$_SESSION['lastname'] = $lastname; 
-$_SESSION['email'] = $email;
-
-}
-
+// Create connection (MySQLi Procedural)
 $conn = mysqli_connect($servername, $username, $password, $database);
 
-if ($conn->connect_error) {
-die("Connection failed: " . $conn->connect_error);
+// Check connection
+if (!$conn) {
+  die("Connection failed: " . mysqli_connect_error());
 }
+echo "<br> Connected successfully <br><br>";
 
-$sql = "insert into userinfo (fname, lname, email) values ('$firstname', '$lastname', '$email')";
+$query_1 = "insert into userinfo (firstname, lastname, age, email) values ('$firstname', '$lastname', $age, '$email')";
+$query_2 = "select * from userinfo";
+$query_3 = "select * from userinfo  order by id desc limit 1";
 
-if ($conn->query($sql) === TRUE) {
-	echo "new record created successfully";
+$result_1 = mysqli_query($conn, $query_1);  // in this method --> this line is a must to deal with db man
+$result_2 = mysqli_query($conn, $query_2);
+$result_3 = mysqli_query($conn, $query_3);
+
+echo '<br>' . 'Number of registered users so far (# of db_rows) = ' . mysqli_num_rows($result_2) . '<br>';
+
+if (mysqli_num_rows($result_3) > 0) {
+  // output data of each row
+  while($row = mysqli_fetch_assoc($result_3)) {
+    echo "<br>A new record has been submitted successfully <br>";
+    echo " - Name: '" . $row["firstname"] . " " . $row["lastname"]  . "' , Age : " . $row["age"] . " , email : " .  $row["email"] . "<br>";
+  }
 } else {
-	echo "Error: " . $sql . "<br>" . $conn->error;
+  echo "0 results";
 }
+
+echo "<h3>Previously registered users are : </h3>";
+
+if (mysqli_num_rows($result_2) > 0) {
+    // output data of each row
+    while($row = mysqli_fetch_assoc($result_2)) {
+      echo " - Name: '" . $row["firstname"] . " " . $row["lastname"]  . "<br>";
+    }
+  } else {
+    echo "0 results";
+  }
+  
 
 $conn->close();
 
-
-
+?>

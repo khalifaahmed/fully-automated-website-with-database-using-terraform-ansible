@@ -2,7 +2,6 @@
 resource "aws_iam_role" "es2_s3_role" {
   name = "ec2-s3-role"
 
-  # there must not be indentation in the json policy man
   assume_role_policy = <<POLICY
 {
   "Version": "2012-10-17",
@@ -24,7 +23,6 @@ resource "aws_iam_policy" "es2_s3_policy" {
   name = "es2-s3-policy"
   path = "/"
 
-  # there must not be indentation in the json policy man
   policy = <<POLICY
 {
   "Version": "2012-10-17",

@@ -1,4 +1,4 @@
-- name: play-1 
+- name: configure the databese server 
   hosts: all
   become: yes
   tasks: 
@@ -10,12 +10,20 @@
       - python
       - python3
       - pip
+      - docker
       - vim
       - net-tools
       - mysql-server
       - mysql
+      - bash-completion.noarch      
       update_cache: yes
       state: present
+  - name: making some alias
+    ansible.builtin.blockinfile:
+      path: /etc/bashrc
+      block: |
+        alias c=clear
+        alias k=kubectl         
   - name: start & enable mysqld
     systemd: 
       name: mysqld
@@ -27,13 +35,7 @@
     pip: 
       name: 
       - mysql-connector 
-      - PyMySQL   
-  # - name: Install mysql python module
-  #   vars:
-  #     ansible_python_interpreter: /usr/bin/python3
-  #   pip: 
-  #     name: 
-  #     - mysql-connector          
+      - PyMySQL           
   - name: Create database user with password and all database privileges and 'WITH GRANT OPTION'
     community.mysql.mysql_user:
       name: iti
@@ -59,5 +61,4 @@
     community.mysql.mysql_query:
       login_db: iti
       query:
-      # - create table userinfo (fname varchar(15), lname varchar(15), email varchar(30)  , constraint c1 primary key (fname))
-      - create table userinfo (fname varchar(15), lname varchar(15), email varchar(30) )
+      - create table userinfo (id int not null auto_increment, firstname varchar(25), lastname varchar(25), age int, email varchar(40) ,constraint c1 primary key (id))

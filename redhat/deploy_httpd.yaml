@@ -1,4 +1,4 @@
-- name: play-1 Configure httpd server
+- name: Configure httpd server
   hosts: all
   become: yes
   tasks: 
@@ -14,10 +14,17 @@
       - httpd
       - vim
       - net-tools
-      #- mysql-server
+      #- mysql-server   --> will deploy the database on a separate dedicated server
       - mysql
+      - bash-completion.noarch      
       update_cache: yes
       state: present
+  - name: making some alias
+    ansible.builtin.blockinfile:
+      path: /etc/bashrc
+      block: |
+        alias c=clear
+        alias k=kubectl         
   - name: start & enable httpd
     systemd: 
       name: httpd
@@ -28,11 +35,6 @@
       name: 'https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm'
       state: present
       disable_gpg_check: true
-  # - name: Install the php rpm from a remote repo
-  #   ansible.builtin.dnf:
-  #     name: 'https://rpms.remirepo.net/enterprise/remi-release-8.rpm'
-  #     state: present 
-  #     disable_gpg_check: true
   - name : enable dnf module enable php
     command: dnf module -y enable php
   - name: Install the latest version of Apache from the testing repo
@@ -52,27 +54,8 @@
   - name: Reload service httpd
     ansible.builtin.systemd:
       name: httpd.service
-      state: restarted
+      state: restarted  
   - name: Put SELinux in permissive mode, logging actions that would be blocked.
     ansible.posix.selinux:
       policy: targeted
       state: permissive
-      
-  # - name: Allow Apache to listen on tcp port 8888
-  #   community.general.seport:
-  #     ports: 81-89,8888
-  #     proto: tcp
-  #     setype: http_port_t
-  #     state: present
-  # - name: permit traffic in default zone for https service
-  #   ansible.posix.firewalld:
-  #     service: https
-  #     permanent: true
-  #     state: enabled
-  # - ansible.posix.firewalld:
-  #     zone: trusted
-  #     interface: eth2
-  #     permanent: true
-  #     state: enabled    
-
-

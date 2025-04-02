@@ -31,7 +31,7 @@ resource "aws_instance" "db_server" {
   vpc_security_group_ids      = [aws_security_group.grad_proj_sg["ssh"].id, aws_security_group.grad_proj_sg["http_https"].id, aws_security_group.grad_proj_sg["public"].id] #vpc_security_group_ids      = [ aws_security_group.http-only.id, aws_security_group.ssh-only.id ]
   source_dest_check           = true
   credit_specification {
-    cpu_credits = "standard"  #As T3 instances are launched as unlimited by default. T2 instances are launched as standard by default
+    cpu_credits = "standard" #As T3 instances are launched as unlimited by default. T2 instances are launched as standard by default
   }
 
   # root disk  
@@ -49,9 +49,9 @@ resource "aws_instance" "db_server" {
 
 resource "null_resource" "configure_html_files" {
   provisioner "local-exec" {
-    command = "export dburl=${aws_instance.db_server.public_ip} ; envsubst '$dburl' < ./redhat/html_files/addcontact-vars > ./redhat/html_files/addcontact.php ; envsubst '$dburl' < ./redhat/html_files/print_users-vars > ./redhat/html_files/print_users.php ; sleep 180 ; ansible-playbook --inventory ${aws_instance.db_server.public_ip}, --user ec2-user  ./redhat/deploy_mysql_server.yaml"
+    command = "export dburl=${aws_instance.db_server.public_ip} ; envsubst '$dburl' < ./redhat/html_files/addcontact-vars > ./redhat/html_files/addcontact.php ; envsubst '$dburl' < ./redhat/html_files/print_users-vars > ./redhat/html_files/print_users.php ; sleep 120 ; ansible-playbook --inventory ${aws_instance.db_server.public_ip}, --user ec2-user  ./redhat/deploy_mysql_server.yaml"
   }
-  depends_on                  = [aws_instance.db_server]
+  depends_on = [aws_instance.db_server]
 }
 
 resource "aws_instance" "httpd_server" {
@@ -64,7 +64,7 @@ resource "aws_instance" "httpd_server" {
   vpc_security_group_ids      = [aws_security_group.grad_proj_sg["ssh"].id, aws_security_group.grad_proj_sg["http_https"].id, aws_security_group.grad_proj_sg["public"].id]
   source_dest_check           = true
   credit_specification {
-    cpu_credits = "standard"  #As T3 instances are launched as unlimited by default. T2 instances are launched as standard by default
+    cpu_credits = "standard" #As T3 instances are launched as unlimited by default. T2 instances are launched as standard by default
   }
 
   # root disk  
@@ -81,7 +81,7 @@ resource "aws_instance" "httpd_server" {
 
   provisioner "local-exec" {
     working_dir = "./"
-    command     = "sleep 125 ; ansible-playbook --inventory ${aws_instance.httpd_server.public_ip}, --user ec2-user  ./redhat/deploy_httpd.yaml"
+    command     = "sleep 100 ; ansible-playbook --inventory ${aws_instance.httpd_server.public_ip}, --user ec2-user  ./redhat/deploy_httpd.yaml"
   }
 }
 

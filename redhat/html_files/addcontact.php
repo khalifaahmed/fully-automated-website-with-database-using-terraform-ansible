@@ -15,7 +15,7 @@ $_SESSION['email'] = $email;
 
 //echo "<br> Hello  '$firstname $lastname', your age is $age & your email is '$email'<br>";
 
-$servername = "16.16.96.160";   
+$servername = "16.171.146.141";   
 $database   = "iti";   
 $username   = "iti";     
 $password   = "iti";     
@@ -40,8 +40,6 @@ $result_3 = mysqli_query($conn, $query_3);
 
 $_SESSION['result_2'] = $result_2;
 
-echo '<br>' . 'Number of registered users so far (# of db_rows) = ' . mysqli_num_rows($result_2) . '<br>';
-
 if (mysqli_num_rows($result_3) > 0) {
   // output data of each row
   while($row = mysqli_fetch_assoc($result_3)) {
@@ -51,6 +49,8 @@ if (mysqli_num_rows($result_3) > 0) {
 } else {
   echo "0 results";
 }
+
+echo '<br>' . 'Number of registered users so far (# of db_rows) = ' . mysqli_num_rows($result_2) . '<br>';
 
 echo "<br>";
 echo "<a href='print_users.php'>see other users : </a> <br>";

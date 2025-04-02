@@ -35,8 +35,8 @@
       name: 'https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm'
       state: present
       disable_gpg_check: true
-  - name : enable dnf module enable php
-    command: dnf module -y enable php
+#  - name : enable dnf module enable php
+#    command: dnf module -y enable php
   - name: Install the latest version of Apache from the testing repo
     ansible.builtin.dnf:
       name:
